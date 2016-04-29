@@ -1,5 +1,4 @@
 <?php
-
 class read_classes {
 	function read($path) {
 		$file = file_get_contents ( $path );
@@ -18,7 +17,6 @@ class read_classes {
 		return $classes;
 	}
 }
-
 class read_weeks {
 	function read($path) {
 		$file = file_get_contents ( $path );
@@ -49,7 +47,6 @@ class read_weeks {
 		return $weeks;
 	}
 }
-
 class read_plan {
 	function read($path) {
 		$file = file_get_contents ( $path );
@@ -58,57 +55,49 @@ class read_plan {
 		// @ is suppress for html parse failure. The Document is not a W3C file.
 		@$dom->loadHTML ( $file );
 		
-		$days = array (
-				"Montag",
-				"Dienstag",
-				"Mittwoch",
-				"Donnerstag",
-				"Freitag",
-				"Samstag",
-				"Sonntag" 
-		);
-		
 		$nodeValue;
 		$days;
-		$counter=0;
-		foreach ( $dom->getElementsByTagName ( "table" ) as $tr ) {
-			
-			//echo $tr->nodeValue;
-			//$tr->nodeValue = $tr->nodeValue.$counter;
-			//echo "\n";
-			//echo $counter."\n";
-			$nodeValue [] = $tr->nodeValue." c: ".$counter;
-			$counter++;
-			/*
-			foreach ( $tr->getElementsByTagName ( "td" ) as $td ) {
-				foreach ( $days as $day ) {
-					if (strpos ( $td->nodeValue, $day ) !== false) {
-						$days [] = $td->nodeValue;
-					}
-				}
-			}
-			*/
-	
+		
+		foreach ( $dom->getElementsByTagName ( "table" ) as $table ) {
+			$nodeValue [] = $table->nodeValue;
 		}
+		// echo $counter;
+		// remove erstes element das ist die ober Table
 		unset ( $nodeValue [0] );
-		foreach ($nodeValue as $value) {
-			echo $value."\n";
+		
+		// remove montag - freitag
+		for($i = 0; $i < 8; $i ++) {
+			unset ( $nodeValue [$i] );
 		}
-		/*$counter = 0;
-		$nodeValuesDelet;
+		$counter = 0;
+		$counterStunden = 0;
+		$counterTage = 0;
+		
+		$woche;
+		$tag;
+		$stunden;
+		
 		foreach ( $nodeValue as $value ) {
-			foreach ( $days as $day ) {
-				if (strpos ( $value, $day ) !== false) {
-					$nodeValuesDelet [] = $counter;
-				}
-				$counter ++;
+			// echo $value." ".$counter."\n";
+			//echo "stu " . $counterStunden . "\n";
+			//echo "cou " . $counter . "\n";
+			//echo "tag " . $counterTage . "\n";
+			$tag [$counterTage] = $value;
+			$stunden [$counterStunden] = $tag;
+			$counter ++;
+			if ($counter % 7 == 0) {
+				$counterStunden ++;
+				$counterTage = 0;
+			} else {
+				$counterTage ++;
 			}
 		}
-		// echo $nodeValuesDelet;
-		foreach ( $nodeValuesDelet as $array_key ) {
-			unset ( $nodeValue [$array_key] );
-		}*/
-		return $nodeValue;
+		$size = count($stunden);
+		for ($i = size; $i < $size-7; $i--) {
+			unset($stunden[$i]);
+		}
+		
+		return $stunden;
 	}
 }
 
@@ -117,25 +106,48 @@ $path = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/nav
 $classes = new read_classes ();
 $array = $classes->read ( $path );
 foreach ( $array as $value ) {
-	//echo $value;
-	//echo "</br>";
+	// echo $value;
+	// echo "</br>";
 }
 // echo json_encode($array);
 
 $weeks = new read_weeks ();
 $array = $weeks->read ( $path );
 foreach ( $array as $value ) {
-	//echo $value;
-	//echo "</br>";
+	// echo $value;
+	// echo "</br>";
 }
 // echo json_encode($array);
 
-$path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/17/c/c00073.htm";
+$path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/17/c/c00020.htm";
 $plan = new read_plan ();
 $array = $plan->read ( $path_plan );
+$counter = 0;
+$counter2 = 0;
+$days = array (
+		"Montag",
+		"Dienstag",
+		"Mittwoch",
+		"Donnerstag",
+		"Freitag",
+		"Samstag",
+		"Sonntag" 
+);
+
 foreach ( $array as $value ) {
-	//echo $value;
-	// echo "</br>";
+	// echo "Stunden ".$counter%13;
+	foreach ( $value as $value2 ) {
+		if ($counter2 == 0) {
+			echo "Stunde: ";
+		} else {
+			echo "Tage: " . $days [$counter2 - 1];
+		}
+		echo $value2;
+		echo "</br>";
+		$counter2 ++;
+	}
+	$counter2 = 0;
+	$counter ++;
 }
 ?>
 	
