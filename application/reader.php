@@ -1,10 +1,8 @@
 <?php
 
-class read_classes
-{
+class read_classes {
 
-    function read ($path)
-    {
+    function read ($path) {
         $file = file_get_contents($path);
         $search_string_start = "var classes = [";
         $search_string_end = " var flcl = 1; var flte = 1;";
@@ -22,11 +20,9 @@ class read_classes
     }
 }
 
-class read_weeks
-{
+class read_weeks {
 
-    function read ($path)
-    {
+    function read ($path) {
         $file = file_get_contents($path);
         
         $search_string_start = "<select name=\"week\" class=\"selectbox\" onChange=\"doDisplayTimetable(NavBar, topDir);\">";
@@ -63,6 +59,7 @@ class read_weeks
             if ($dataCounter % 2 != 1) {
                 $weeks[0] = $dataFields;
             } else {
+                $dataFields = preg_replace('/\s+/', '', $dataFields);
                 $weeks[1] = $dataFields;
                 $result[$resultCounter] = $weeks;
                 $resultCounter ++;
@@ -75,11 +72,9 @@ class read_weeks
     }
 }
 
-class read_plan
-{
+class read_plan {
 
-    function read ($path)
-    {
+    function read ($path) {
         $file = file_get_contents($path);
         
         $dom = new DOMDocument();
@@ -152,84 +147,81 @@ class read_plan
     }
 }
 
-function getData ()
-{
-    $path = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+function getData () {
+    $naviPath = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
     
     $weeks = new read_weeks();
-    $array = $weeks->read($path);
-    $counterWeek = 0;
-    foreach ($array as $WeekValue) {
-        if ($counterWeek % 2 != 1) {
+    $classes = new read_classes();
+    
+    $db = new db();
+    $db->connectDB();
+    
+    foreach ($weeks->read($naviPath) as $WeekValue) {
+        $weekResult = $db->insertWeeks($WeekValue[0], $WeekValue[1]);
+        echo "--- Eintragen der Woche:" . $weekResult['number'] . "</br>";
+        
+        $classCounter = 0;
+        
+        foreach ($classes->read($naviPath) as $classData) {
+            $classCounter ++;
+            $classNumber;
+            
+            if ($classCounter < 10) {
+                $classNumber = "0" . $classCounter;
+            } else {
+                $classNumber = $classCounter;
+            }
+            
+            $classResult = $db->insertClass($weekResult['id'], $classNumber, $classData);
+            echo $classResult['id'].$classResult['name']."</br>";
             
             /*
-             * $classes = new read_classes ();
-             * $array = $classes->read ( $path );
-             * $classCounter = 0;
-             * foreach ( $array as $hourValue ) {
-             * $classCounter ++;
-             * $classNumber;
-             *
-             * if ($classCounter < 10) {
-             * $classNumber = "0" . $classCounter;
-             * } else {
-             * $classNumber = $classCounter;
-             * }
-             * $path_plan =
-             * "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
-             * $WeekValue . "/c/c000" . $classNumber . ".htm";
-             *
-             * echo $path_plan;
-             * echo "</br>";
-             * $plan = new read_plan ();
-             * $array = $plan->read ( $path_plan );
-             * $counter = 0;
-             * $counter2 = 0;
-             * $days = array (
-             * "Montag",
-             * "Dienstag",
-             * "Mittwoch",
-             * "Donnerstag",
-             * "Freitag",
-             * "Samstag",
-             * "Sonntag"
-             * );
-             *
-             * foreach ( $array as $hourValue ) {
-             * // echo "Stunden ".$counter%13;
-             * foreach ( $hourValue as $dayValue ) {
-             * if ($counter2 == 0) {
-             * echo "Stunde: ";
-             * } else {
-             * echo "Tage: " . $days [$counter2 - 1];
-             * echo "</br>";
-             * }
-             * foreach ( $dayValue as $fildValue ) {
-             *
-             * echo $fildValue;
-             * echo "</br>";
-             * }
-             * echo "</br>";
-             * $counter2 ++;
-             * }
-             * $counter2 = 0;
-             * $counter ++;
-             * }
-             * }
-             */
+            $path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
+                     $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
+            
+            echo $path_plan;
+            echo "</br>";
+            $plan = new read_plan();
+            $array = $plan->read($path_plan);
+            $counter = 0;
+            $counter2 = 0;
+            $days = array(
+                    "Montag",
+                    "Dienstag",
+                    "Mittwoch",
+                    "Donnerstag",
+                    "Freitag",
+                    "Samstag",
+                    "Sonntag"
+            );
+            
+            foreach ($array as $hourValue) {
+                // echo "Stunden ".$counter%13;
+                foreach ($hourValue as $dayValue) {
+                    if ($counter2 == 0) {
+                        echo "Stunde: ";
+                    } else {
+                        echo "Tage: " . $days[$counter2 - 1];
+                        echo "</br>";
+                    }
+                    foreach ($dayValue as $fildValue) {
+                        
+                        echo $fildValue;
+                        echo "</br>";
+                    }
+                    echo "</br>";
+                    $counter2 ++;
+                }
+                $counter2 = 0;
+                $counter ++;
+                
+            }*/
         }
-        $counterWeek ++;
-        
-        $db = new db();
-        
-        $db->connectDB();
-        echo $db->insertWeeks($WeekValue[0], $WeekValue[1]);
-        $db->closeDB();
     }
+    $db->closeDB();
 }
 
-class db
-{
+class db {
 
     private $conn;
 
@@ -241,49 +233,39 @@ class db
 
     private $stm;
 
-    function connectDB ()
-    {
+    function connectDB () {
         $this->conn = new mysqli("localhost", "root", "", "bkkUnits");
     }
 
-    function getResult ($query)
-    {
+    function getResult ($query) {
         $this->doResult($query);
         return $this->result;
     }
 
-    function getRowNums ()
-    {
+    function getRowNums () {
         $this->doRowNums();
         return $this->rowNums;
     }
 
-    function closeDB ()
-    {
+    function closeDB () {
         $this->conn->close();
     }
 
-    function getAffectRows ()
-    {
+    function getAffectRows () {
         $this->doAffectRows();
         return $this->affectRows;
     }
 
-    function getPreStm ($query)
-    {
+    function getPreStm ($query) {
         $this->doPreStm($query);
         return $this->stm;
     }
 
-    function insertWeeks ($number, $date)
-    {
-        $id;
-        
+    function insertWeeks ($number, $date) {      
         $result = $this->selectWeek(null, $number, $date);
+        
         if ($this->getRowNums() >= 1) {
-            while ($row = mysqli_fetch_array($result)) {
-                return $row['id'];
-            }
+            return mysqli_fetch_array($result);
         } else {
             $insertWeeks = "INSERT INTO `weeks` ( `number`, `date`) VALUES (?, ?)";
             
@@ -292,40 +274,78 @@ class db
             $stm->execute();
             $id = $stm->insert_id;
             $stm->close();
-            return $id;
+            
+            $this->selectWeek($id, null, null);
+            return mysqli_fetch_array($this->result);
         }
     }
 
-    function selectWeek ($id, $number, $date)
-    {
-        $selectWeeks = "SELECT * FROM `weeks` WHERE `number` LIKE '" . $number .
-                 "' AND `date` LIKE '" . $date."'";
-        echo $selectWeeks;
+    function selectWeek ($id, $number, $date) {
+       
+            $selectWeeks = "SELECT * FROM `weeks` WHERE ".
+                    "`id` = COALESCE(" . $this->msqli_set_null($id) . ", `id`) AND".
+                    "`number` LIKE COALESCE(" .$this->msqli_set_null($number) . ", `number`) AND ".
+                    "`date` LIKE COALESCE(" . $this->msqli_set_null($date) . ", `date`)";
+      
         return $this->getResult($selectWeeks);
     }
+    
+    function insertClass($weeksId, $number, $name) {
+        $result = $this->selectClass(null, $weeksId, $number, $name);
+        
+        if ($this->getRowNums() >= 1) {
+            return mysqli_fetch_array($result);
+        } else {
+            
+        $insertClass = "INSERT INTO `classes` (`weeksId`, `number`, `name`) VALUES ( ?,?,?)";
+        $stm = $this->getPreStm($insertClass);
+        $stm->bind_param("iss", $weeksId, $number, $name);
+        $stm->execute();
+        $id = $stm->insert_id;
+        $stm->close();
+        
+        $this->selectClass($id, null, null, null);
+        return mysqli_fetch_array($this->result);
+        
+        }
+    }
+    
+    function selectClass($id, $weeksId, $number, $name) {
+        $selectClass = "SELECT * FROM `classes` WHERE ".
+                "`id` = COALESCE(" . $this->msqli_set_null($id) . ", `id`) AND".
+                "`weeksId` = COALESCE(" . $this->msqli_set_null($weeksId) . ", `weeksId`) AND".
+                "`number` = COALESCE(" . $this->msqli_set_null($number) . ", `number`) AND".
+                "`name` = COALESCE(" . $this->msqli_set_null($name) . ", `name`)";
+        return $this->getResult($selectClass);
+    }
 
-    private function doResult ($query)
-    {
+    private function doResult ($query) {
         $this->result = $this->conn->query($query);
     }
 
-    private function doRowNums ()
-    {
-        if (!$this->result) {
+    private function doRowNums () {
+        if (! $this->result) {
             $this->rowNums = 0;
         } else {
             $this->rowNums = $this->result->num_rows;
         }
     }
 
-    private function doAffectRows ()
-    {
+    private function doAffectRows () {
         $this->affectRows = $this->conn->affected_rows;
     }
 
-    private function doPreStm ($query)
-    {
+    private function doPreStm ($query) {
         $this->stm = $this->conn->prepare($query);
+    }
+    
+    private function msqli_set_null($param) {
+        if($param === null){
+            $param = "null";
+        }else{
+            $param = "'".$param."'";
+        }
+        return $param;
     }
 }
 
@@ -333,11 +353,8 @@ getData();
 
 $db = new db();
 $db->connectDB();
-$queryText = "select * from weeks";
 
-// $result = $db->getResult ( $insertWeeks );
-
-$result = $db->getResult($queryText);
+$result = $db->selectWeek(null, null, null);
 
 while ($row = mysqli_fetch_array($result)) {
     echo $row['date'];
