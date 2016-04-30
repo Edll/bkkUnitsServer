@@ -59,7 +59,8 @@ class read_plan {
 		$days;
 		
 		foreach ( $dom->getElementsByTagName ( "table" ) as $table ) {
-			$nodeValue [] = $table->nodeValue;
+			// $nodeValue [] = $table->nodeValue;
+			$nodeValue [] = $table;
 		}
 		// echo $counter;
 		// remove erstes element das ist die ober Table
@@ -69,35 +70,52 @@ class read_plan {
 		for($i = 0; $i < 8; $i ++) {
 			unset ( $nodeValue [$i] );
 		}
-		$counter = 0;
-		$counterStunden = 0;
-		$counterTage = 0;
+		$dataCounter = 0;
+		$stundeCounter = 0;
+		$tagCounter = 0;
 		
-		$woche;
-		$tag;
-		$stunden;
+		$tagArray;
+		$stundenArray;
+		$fieldInfoArray;
 		
 		foreach ( $nodeValue as $value ) {
-			// echo $value." ".$counter."\n";
-			//echo "stu " . $counterStunden . "\n";
-			//echo "cou " . $counter . "\n";
-			//echo "tag " . $counterTage . "\n";
-			$tag [$counterTage] = $value;
-			$stunden [$counterStunden] = $tag;
-			$counter ++;
-			if ($counter % 7 == 0) {
-				$counterStunden ++;
-				$counterTage = 0;
+			
+			// Reset der FieldInfo Daten
+			unset ( $fieldInfoArray );
+			
+			// TagCounter ist null Stunden Spalte
+			if ($tagCounter == 0) {
+				$fieldInfoArray [0] = $value->nodeValue;
 			} else {
-				$counterTage ++;
+				// Durchgehen der Tage von Montag bis Samstag
+				
+				// Abfrage der td Felder in einem Info feld um diese dann auszugeben
+				$counterTd = 0;
+				foreach ( $value->getElementsByTagName ( "tr" ) as $td ) {
+					$fieldInfoArray [$counterTd] = $td->nodeValue;
+					$counterTd ++;
+				}
+			}
+			
+			// Eintragen der Daten in das Rückgabe Array
+			$tagArray [$tagCounter] = $fieldInfoArray;
+			$stundenArray [$stundeCounter] = $tagArray;
+			
+			// Durchzählen der Tabel struktur
+			$dataCounter ++;
+			if ($dataCounter % 7 == 0) {
+				$stundeCounter ++;
+				$tagCounter = 0;
+			} else {
+				$tagCounter ++;
 			}
 		}
-		$size = count($stunden);
-		for ($i = size; $i < $size-7; $i--) {
-			unset($stunden[$i]);
-		}
+		$size = count ( $stundenArray );
 		
-		return $stunden;
+		// entfernen der 14 stunden. wo die her kommt ist unklar. Offenbar aus dem DOM model.
+		unset ( $stundenArray [$size - 1] );
+		
+		return $stundenArray;
 	}
 }
 
@@ -105,7 +123,7 @@ $path = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/nav
 
 $classes = new read_classes ();
 $array = $classes->read ( $path );
-foreach ( $array as $value ) {
+foreach ( $array as $hourValue ) {
 	// echo $value;
 	// echo "</br>";
 }
@@ -113,13 +131,13 @@ foreach ( $array as $value ) {
 
 $weeks = new read_weeks ();
 $array = $weeks->read ( $path );
-foreach ( $array as $value ) {
+foreach ( $array as $hourValue ) {
 	// echo $value;
 	// echo "</br>";
 }
 // echo json_encode($array);
 
-$path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/17/c/c00020.htm";
+$path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/17/c/c00073.htm";
 $plan = new read_plan ();
 $array = $plan->read ( $path_plan );
 $counter = 0;
@@ -134,15 +152,19 @@ $days = array (
 		"Sonntag" 
 );
 
-foreach ( $array as $value ) {
+foreach ( $array as $hourValue ) {
 	// echo "Stunden ".$counter%13;
-	foreach ( $value as $value2 ) {
+	foreach ( $hourValue as $dayValue ) {
 		if ($counter2 == 0) {
 			echo "Stunde: ";
 		} else {
 			echo "Tage: " . $days [$counter2 - 1];
+			echo "</br>";
 		}
-		echo $value2;
+		foreach ( $dayValue as $fildValue ) {
+			
+			echo $fildValue;	echo "</br>";
+		}
 		echo "</br>";
 		$counter2 ++;
 	}
