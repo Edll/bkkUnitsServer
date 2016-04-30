@@ -38,6 +38,7 @@ class read_weeks {
 		$week_string = str_replace ( "value=", "", $week_string );
 		$week_string = str_replace ( "\"", " ", $week_string );
 		
+		// TODO Weeks Value must be convert to int and than reduce -1 but check it in the raw datas
 		$weeks = explode ( " ", $week_string );
 		
 		unset ( $weeks [0] );
@@ -118,58 +119,154 @@ class read_plan {
 		return $stundenArray;
 	}
 }
-
-$path = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
-
-$classes = new read_classes ();
-$array = $classes->read ( $path );
-foreach ( $array as $hourValue ) {
-	// echo $value;
-	// echo "</br>";
-}
-// echo json_encode($array);
-
-$weeks = new read_weeks ();
-$array = $weeks->read ( $path );
-foreach ( $array as $hourValue ) {
-	// echo $value;
-	// echo "</br>";
-}
-// echo json_encode($array);
-
-$path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/17/c/c00073.htm";
-$plan = new read_plan ();
-$array = $plan->read ( $path_plan );
-$counter = 0;
-$counter2 = 0;
-$days = array (
-		"Montag",
-		"Dienstag",
-		"Mittwoch",
-		"Donnerstag",
-		"Freitag",
-		"Samstag",
-		"Sonntag" 
-);
-
-foreach ( $array as $hourValue ) {
-	// echo "Stunden ".$counter%13;
-	foreach ( $hourValue as $dayValue ) {
-		if ($counter2 == 0) {
-			echo "Stunde: ";
-		} else {
-			echo "Tage: " . $days [$counter2 - 1];
-			echo "</br>";
-		}
-		foreach ( $dayValue as $fildValue ) {
+function getData() {
+	$path = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+	
+	$weeks = new read_weeks ();
+	$array = $weeks->read ( $path );
+	$counterWeek = 0;
+	foreach ( $array as $WeekValue ) {
+		if ($counterWeek % 2 != 1) {
 			
-			echo $fildValue;	echo "</br>";
+			$classes = new read_classes ();
+			$array = $classes->read ( $path );
+			$classCounter = 0;
+			foreach ( $array as $hourValue ) {
+				$classCounter ++;
+				$classNumber;
+				
+				if ($classCounter < 10) {
+					$classNumber = "0" . $classCounter;
+				} else {
+					$classNumber = $classCounter;
+				}
+				$path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" . $WeekValue . "/c/c000" . $classNumber . ".htm";
+				
+				echo $path_plan;
+				echo "</br>";
+				$plan = new read_plan ();
+				$array = $plan->read ( $path_plan );
+				$counter = 0;
+				$counter2 = 0;
+				$days = array (
+						"Montag",
+						"Dienstag",
+						"Mittwoch",
+						"Donnerstag",
+						"Freitag",
+						"Samstag",
+						"Sonntag" 
+				);
+				
+				foreach ( $array as $hourValue ) {
+					// echo "Stunden ".$counter%13;
+					foreach ( $hourValue as $dayValue ) {
+						if ($counter2 == 0) {
+							echo "Stunde: ";
+						} else {
+							echo "Tage: " . $days [$counter2 - 1];
+							echo "</br>";
+						}
+						foreach ( $dayValue as $fildValue ) {
+							
+							echo $fildValue;
+							echo "</br>";
+						}
+						echo "</br>";
+						$counter2 ++;
+					}
+					$counter2 = 0;
+					$counter ++;
+				}
+			}
 		}
-		echo "</br>";
-		$counter2 ++;
+		$counterWeek ++;
+		
+		$db = new db ();
+		
+		$db->connectDB ();
+		$db->insertWeeks ( "42", "2024" );
+		$db->closeDB ();
 	}
-	$counter2 = 0;
-	$counter ++;
 }
+class db {
+	private $conn;
+	private $rowNums;
+	private $result;
+	private $affectRows;
+	private $stm;
+	function connectDB() {
+		$this->conn = new mysqli ( "localhost", "root", "", "bkkUnits" );
+	}
+	function getResult($query) {
+		$this->doResult ( $query );
+		return $this->result;
+	}
+	function getRowNums() {
+		$this->doRowNums ();
+		return $this->rowNums;
+	}
+	function closeDB() {
+		$this->conn->close ();
+	}
+	function getAffectRows() {
+		$this->doAffectRows ();
+		return $this->affectRows;
+	}
+	function getPreStm($query) {
+		$this->doPreStm ( $query );
+		return $this->stm;
+	}
+	function insertWeeks($number, $date) {
+		$insertWeeks = "INSERT INTO `weeks` ( `number`, `date`) VALUES (?, ?)";
+		$stm = $this->getPreStm ( $insertWeeks );
+		$stm->bind_param ( "ss", $number, $date );
+		$stm->execute ();
+		$stm->close ();
+	}
+	private function doResult($query) {
+		$this->result = $this->conn->query ( $query );
+	}
+	private function doRowNums() {
+		if ($this->result) {
+			$this->rowNums = 0;
+		} else {
+			$this->rowNums = mysqli_num_rows ( $this->result );
+		}
+	}
+	private function doAffectRows() {
+		$this->affectRows = $this->conn->affected_rows;
+	}
+	private function doPreStm($query) {
+		$this->stm = $this->conn->prepare ( $query );
+	}
+}
+
+
+getData();
+
+$db = new db ();
+$db->connectDB ();
+$queryText = "select * from weeks";
+
+
+
+// $result = $db->getResult ( $insertWeeks );
+
+if ($db->getAffectRows () == 0) {
+	echo "nicht eingetragen</br>";
+} else {
+	echo "eingetragen: " . $db->getAffectRows () . "</br>";
+}
+
+$result = $db->getResult ( $queryText );
+
+while ( $row = mysqli_fetch_array ( $result ) ) {
+	echo $row ['date'];
+	echo "</br>";
+}
+
+$db->closeDB ();
+
 ?>
 	
