@@ -55,27 +55,27 @@ function getData () {
                 
                 foreach ($hourValue as $dayValue) {
                     if ($tagColumeCounter != 0) {
-                        echo "Tage: " . $plan->days[$tagColumeCounter - 1];
-                        echo "</br>";
+                      //  echo "Tage: " . $plan->days[$tagColumeCounter - 1];
+                     //   echo "</br>";
                     }
                     $stunde;
                     $fieldTypCounter = 0;
                     
                     foreach ($dayValue as $fildValue) {
                         if ($tagColumeCounter == 0) {
-                            echo "Stunde: ";
-                            echo $fildValue;
-                            echo "</br>";
+                          //  echo "Stunde: ";
+                          //  echo $fildValue;
+                          //  echo "</br>";
                             $stunde = $dataFields = preg_replace('/\s+/', '', 
                                     $fildValue);
                         } else {
                             if($fildValue !== ""){
-                            echo $fildValue . "</br>";
+                          //  echo $fildValue . "</br>";
                             $db->insertFieldInfo($hourId, 
                                     preg_replace('/\s+/', ' ', $fildValue), 
                                     $fieldTypCounter);
                             }else{
-                                echo "Field is empty</br>";
+                              //  echo "Field is empty</br>";
                             }
                         }
                         $fieldTypCounter ++;
@@ -87,7 +87,7 @@ function getData () {
                 }
                 $tagColumeCounter = 0;
             }
-            break;
+         
         }
     }
     $db->closeDB();
