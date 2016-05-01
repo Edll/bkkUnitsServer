@@ -69,10 +69,14 @@ function getData () {
                             $stunde = $dataFields = preg_replace('/\s+/', '', 
                                     $fildValue);
                         } else {
+                            if($fildValue !== ""){
                             echo $fildValue . "</br>";
                             $db->insertFieldInfo($hourId, 
                                     preg_replace('/\s+/', ' ', $fildValue), 
                                     $fieldTypCounter);
+                            }else{
+                                echo "Field is empty</br>";
+                            }
                         }
                         $fieldTypCounter ++;
                     }
@@ -83,6 +87,7 @@ function getData () {
                 }
                 $tagColumeCounter = 0;
             }
+            break;
         }
     }
     $db->closeDB();
