@@ -150,15 +150,16 @@ class read_plan {
 function getData () {
     $naviPath = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
     
-    $weeks = new read_weeks();
-    $classes = new read_classes();
-    
     $db = new db();
     $db->connectDB();
     
+    $weeks = new read_weeks();
+    $classes = new read_classes();
+    $plan = new read_plan();
+    
     foreach ($weeks->read($naviPath) as $WeekValue) {
         $weekResult = $db->insertWeeks($WeekValue[0], $WeekValue[1]);
-        echo "--- Eintragen der Woche:" . $weekResult['number'] . "</br>";
+        echo "--- Eintragen der Woche: " . $weekResult['number'] . "</br>";
         
         $classCounter = 0;
         
@@ -172,17 +173,18 @@ function getData () {
                 $classNumber = $classCounter;
             }
             
-            $classResult = $db->insertClass($weekResult['id'], $classNumber, $classData);
-            echo $classResult['id'].$classResult['name']."</br>";
+            $classResult = $db->insertClass($weekResult['id'], $classNumber, 
+                    $classData);
+            echo "--- Eintragen der Klasse: " . $classResult['id'] . " " .
+                     $classResult['name'] . "</br>";
             
-            /*
             $path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
                      $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
             
-            echo $path_plan;
-            echo "</br>";
-            $plan = new read_plan();
-            $array = $plan->read($path_plan);
+            echo "Pfad: " . $path_plan . "</br>";
+            
+            $planData = $plan->read($path_plan);
+            
             $counter = 0;
             $counter2 = 0;
             $days = array(
@@ -194,9 +196,9 @@ function getData () {
                     "Samstag",
                     "Sonntag"
             );
-            
-            foreach ($array as $hourValue) {
-                // echo "Stunden ".$counter%13;
+            $hourId;
+            foreach ($planData as $hourValue) {
+                
                 foreach ($hourValue as $dayValue) {
                     if ($counter2 == 0) {
                         echo "Stunde: ";
@@ -204,19 +206,33 @@ function getData () {
                         echo "Tage: " . $days[$counter2 - 1];
                         echo "</br>";
                     }
+                    $stunde;
+                    $fieldTypCounter = 0;
+                    
                     foreach ($dayValue as $fildValue) {
-                        
-                        echo $fildValue;
-                        echo "</br>";
+                        if ($counter2 == 0) {
+                            echo "Stunde: ";
+                            echo $fildValue;
+                            echo "</br>";
+                            $stunde = $dataFields = preg_replace('/\s+/', '', 
+                                    $fildValue);
+                        } else {
+                            echo $fildValue."</br>";
+                            $db->insertFieldInfo($hourId, preg_replace('/\s+/', ' ', $fildValue), $fieldTypCounter);
+                        }
+                        $fieldTypCounter ++;
                     }
-                    echo "</br>";
+                    $hourResult = $db->insertHour($classResult['id'], 
+                            $weekResult['id'], $stunde, $counter2);
+                    $hourId = $hourResult['id'];
                     $counter2 ++;
                 }
                 $counter2 = 0;
                 $counter ++;
-                
-            }*/
+            }
+            break;
         }
+        break;
     }
     $db->closeDB();
 }
@@ -261,7 +277,7 @@ class db {
         return $this->stm;
     }
 
-    function insertWeeks ($number, $date) {      
+    function insertWeeks ($number, $date) {
         $result = $this->selectWeek(null, $number, $date);
         
         if ($this->getRowNums() >= 1) {
@@ -281,43 +297,105 @@ class db {
     }
 
     function selectWeek ($id, $number, $date) {
-       
-            $selectWeeks = "SELECT * FROM `weeks` WHERE ".
-                    "`id` = COALESCE(" . $this->msqli_set_null($id) . ", `id`) AND".
-                    "`number` LIKE COALESCE(" .$this->msqli_set_null($number) . ", `number`) AND ".
-                    "`date` LIKE COALESCE(" . $this->msqli_set_null($date) . ", `date`)";
-      
+        $selectWeeks = "SELECT * FROM `weeks` WHERE " . "`id` = COALESCE(" .
+                 $this->msqli_set_null($id) . ", `id`) AND" .
+                 "`number` LIKE COALESCE(" . $this->msqli_set_null($number) .
+                 ", `number`) AND " . "`date` LIKE COALESCE(" .
+                 $this->msqli_set_null($date) . ", `date`)";
+        
         return $this->getResult($selectWeeks);
     }
-    
-    function insertClass($weeksId, $number, $name) {
+
+    function insertClass ($weeksId, $number, $name) {
         $result = $this->selectClass(null, $weeksId, $number, $name);
         
         if ($this->getRowNums() >= 1) {
             return mysqli_fetch_array($result);
         } else {
             
-        $insertClass = "INSERT INTO `classes` (`weeksId`, `number`, `name`) VALUES ( ?,?,?)";
-        $stm = $this->getPreStm($insertClass);
-        $stm->bind_param("iss", $weeksId, $number, $name);
-        $stm->execute();
-        $id = $stm->insert_id;
-        $stm->close();
+            $insertClass = "INSERT INTO `classes` (`weeksId`, `number`, `name`) VALUES ( ?,?,?)";
+            $stm = $this->getPreStm($insertClass);
+            $stm->bind_param("iss", $weeksId, $number, $name);
+            $stm->execute();
+            $id = $stm->insert_id;
+            $stm->close();
+            
+            $this->selectClass($id, null, null, null);
+            return mysqli_fetch_array($this->result);
+        }
+    }
+
+    function selectClass ($id, $weeksId, $number, $name) {
+        $selectClass = "SELECT * FROM `classes` WHERE " . "`id` = COALESCE(" .
+                 $this->msqli_set_null($id) . ", `id`) AND" .
+                 "`weeksId` = COALESCE(" . $this->msqli_set_null($weeksId) .
+                 ", `weeksId`) AND" . "`number` = COALESCE(" .
+                 $this->msqli_set_null($number) . ", `number`) AND" .
+                 "`name` = COALESCE(" . $this->msqli_set_null($name) .
+                 ", `name`)";
+        return $this->getResult($selectClass);
+    }
+
+    function insertHour ($classesId, $weeksId, $hour, $day) {
+        $result = $this->selectHour(null, $classesId, $weeksId, $hour, $day);
         
-        $this->selectClass($id, null, null, null);
-        return mysqli_fetch_array($this->result);
-        
+        if ($this->getRowNums() >= 1) {
+            return mysqli_fetch_array($result);
+        } else {
+            $insertHour = "INSERT INTO `hours` (`classesId`, `weeksId`, `hour`, `day`) VALUES (?,?,?,?)";
+            $stm = $this->getPreStm($insertHour);
+            $stm->bind_param("iiii", $classesId, $classesId, $hour, $day);
+            $stm->execute();
+            $id = $stm->insert_id;
+            $stm->close();
+            
+            $this->selectHour($id, null, null, null, null);
+            return mysqli_fetch_array($this->result);
+        }
+    }
+
+    function selectHour ($id, $classesId, $weeksId, $hour, $day) {
+        $selectHour = "SELECT * FROM `hours` WHERE " . "`id` = COALESCE(" .
+                 $this->msqli_set_null($id) . ", `id`) AND" .
+                 "`classesId` LIKE COALESCE(" . $this->msqli_set_null(
+                        $classesId) . ", `classesId`) AND " .
+                 "`weeksId` LIKE COALESCE(" . $this->msqli_set_null($weeksId) .
+                 ", `weeksId`) AND " . "`hour` LIKE COALESCE(" .
+                 $this->msqli_set_null($hour) . ", `hour`) AND " .
+                 "`day` LIKE COALESCE(" . $this->msqli_set_null($day) .
+                 ", `day`) ";
+        return $this->getResult($selectHour);
+    }
+    
+    function insertFieldInfo ($hoursId, $data, $dataTyp) {
+        $result = $this->selectFieldInfo(null, $hoursId, $data, $dataTyp);
+    
+        if ($this->getRowNums() >= 1) {
+            return mysqli_fetch_array($result);
+        } else {
+            $insertFieldInfo = "INSERT INTO `fieldInfos` (`hoursId`, `data`, `dataTyp`) VALUES (?,?,?)";
+            $stm = $this->getPreStm($insertFieldInfo);
+            $stm->bind_param("isi", $hoursId, $data, $dataTyp);
+            $stm->execute();
+            $id = $stm->insert_id;
+            $stm->close();
+    
+            $this->selectFieldInfo($id, null, null, null);
+            return mysqli_fetch_array($this->result);
         }
     }
     
-    function selectClass($id, $weeksId, $number, $name) {
-        $selectClass = "SELECT * FROM `classes` WHERE ".
-                "`id` = COALESCE(" . $this->msqli_set_null($id) . ", `id`) AND".
-                "`weeksId` = COALESCE(" . $this->msqli_set_null($weeksId) . ", `weeksId`) AND".
-                "`number` = COALESCE(" . $this->msqli_set_null($number) . ", `number`) AND".
-                "`name` = COALESCE(" . $this->msqli_set_null($name) . ", `name`)";
-        return $this->getResult($selectClass);
+    function selectFieldInfo ($id, $hoursId, $data, $dataTyp) {
+        $selectHour = "SELECT * FROM `fieldInfos` WHERE " .
+                "`id` = COALESCE(" .$this->msqli_set_null($id) . ", `id`) AND" .
+                "`hoursId` LIKE COALESCE(" . $this->msqli_set_null( $hoursId) . ", `hoursId`) AND " .
+                "`data` LIKE COALESCE(" . $this->msqli_set_null($data) . ", `data`) AND " . 
+                "`dataTyp` LIKE COALESCE(" . $this->msqli_set_null($dataTyp) . ", `dataTyp`) ";
+        return $this->getResult($selectHour);
     }
+    
+    
+  
 
     private function doResult ($query) {
         $this->result = $this->conn->query($query);
@@ -338,12 +416,12 @@ class db {
     private function doPreStm ($query) {
         $this->stm = $this->conn->prepare($query);
     }
-    
-    private function msqli_set_null($param) {
-        if($param === null){
+
+    private function msqli_set_null ($param) {
+        if ($param === null) {
             $param = "null";
-        }else{
-            $param = "'".$param."'";
+        } else {
+            $param = "'" . $param . "'";
         }
         return $param;
     }
