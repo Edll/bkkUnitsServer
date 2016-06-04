@@ -130,30 +130,32 @@ class db {
         return $this->getResult($selectHour);
     }
 
-    function insertFieldInfo ($hoursId, $data, $dataTyp) {
-        $result = $this->selectFieldInfo(null, $hoursId, $data, $dataTyp);
+    function insertFieldInfo ($data, $dataTyp, $weeksId, $hour) {
+        $result = $this->selectFieldInfo(null, $data, $dataTyp, 
+                $weeksId, $hour);
         
         if ($this->getRowNums() >= 1) {
             return mysqli_fetch_array($result);
         } else {
-            $insertFieldInfo = "INSERT INTO `fieldInfos` (`hoursId`, `data`, `dataTyp`) VALUES (?,?,?)";
+            $insertFieldInfo = "INSERT INTO `fieldInfos` (`data`,`weeksId` , `hour` ,`dataTyp`) VALUES (?,?,?,?)";
             $stm = $this->getPreStm($insertFieldInfo);
-            $stm->bind_param("isi", $hoursId, $data, $dataTyp);
+            $stm->bind_param("siii", $data, $weeksId, $hour, $dataTyp);
             $stm->execute();
             $id = $stm->insert_id;
             $stm->close();
             
-            $this->selectFieldInfo($id, null, null, null);
+            $this->selectFieldInfo($id, null, null, null, null);
             return mysqli_fetch_array($this->result);
         }
     }
 
-    function selectFieldInfo ($id, $hoursId, $data, $dataTyp) {
+    function selectFieldInfo ($id, $data, $dataTyp, $weeksId, $hour) {
         $selectHour = "SELECT * FROM `fieldInfos` WHERE " . "`id` = COALESCE(" .
-                 $this->msqli_set_null($id) . ", `id`) AND" .
-                 "`hoursId` LIKE COALESCE(" . $this->msqli_set_null($hoursId) .
-                 ", `hoursId`) AND " . "`data` LIKE COALESCE(" .
+                 $this->msqli_set_null($id) . ", `id`) AND" . "`data` LIKE COALESCE(" .
                  $this->msqli_set_null($data) . ", `data`) AND " .
+                 "`weeksId` LIKE COALESCE(" . $this->msqli_set_null($weeksId) .
+                 ", `weeksId`) AND " . "`hour` LIKE COALESCE(" .
+                 $this->msqli_set_null($hour) . ", `hour`) AND " .
                  "`dataTyp` LIKE COALESCE(" . $this->msqli_set_null($dataTyp) .
                  ", `dataTyp`) ";
         return $this->getResult($selectHour);

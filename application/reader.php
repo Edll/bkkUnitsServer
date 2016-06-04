@@ -5,10 +5,10 @@ include ('weeks_import.php');
 include ('plan_import.php');
 
 function getData () {
-    $naviPath = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+    //$naviPath = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
     
-    // $naviPath =
-    // "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+     $naviPath =
+     "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
     
     $db = new db();
     $db->connectDB();
@@ -38,11 +38,11 @@ function getData () {
             echo "--- Eintragen der Klasse: " . $classResult['id'] . " " .
                      $classResult['name'] . "</br>";
             
-            $path_plan = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/" .
-                     $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
-            // $path_plan =
-            // "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
-            // $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
+            //$path_plan = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/" .
+                  //   $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
+             $path_plan =
+             "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
+             $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
             
             echo "Pfad: " . $path_plan . "</br>";
             
@@ -50,7 +50,7 @@ function getData () {
             
             $tagColumeCounter = 0;
             
-            $hourId;
+          //  $hourId;
             foreach ($planData as $hourValue) {
                 
                 foreach ($hourValue as $dayValue) {
@@ -71,18 +71,19 @@ function getData () {
                         } else {
                             if($fildValue !== ""){
                           //  echo $fildValue . "</br>";
-                            $db->insertFieldInfo($hourId, 
-                                    preg_replace('/\s+/', ' ', $fildValue), 
-                                    $fieldTypCounter);
+                            $db->insertFieldInfo(preg_replace('/\s+/', ' ', $fildValue), 
+                                    $fieldTypCounter, 
+                                    $weekResult['id'],
+                                    $stunde);
                             }else{
                               //  echo "Field is empty</br>";
                             }
                         }
                         $fieldTypCounter ++;
                     }
-                    $hourResult = $db->insertHour($classResult['id'], 
-                            $weekResult['id'], $stunde, $tagColumeCounter);
-                    $hourId = $hourResult['id'];
+                    /*$hourResult = $db->insertHour($classResult['id'], 
+                            $weekResult['id'], $stunde, $tagColumeCounter);*/
+                   // $hourId = $hourResult['id'];
                     $tagColumeCounter ++;
                 }
                 $tagColumeCounter = 0;
