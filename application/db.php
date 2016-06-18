@@ -99,61 +99,31 @@ class db {
         return $this->getResult($selectClass);
     }
 
-    function insertHour ($classesId, $weeksId, $hour, $day) {
-        $result = $this->selectHour(null, $classesId, $weeksId, $hour, $day);
+    function insertFieldInfo ($data, $dataTyp, $weeksId, $hour, $classesId) {
+        $result = $this->selectFieldInfo(null, $data, $dataTyp, $weeksId, $hour, $classesId);
         
         if ($this->getRowNums() >= 1) {
             return mysqli_fetch_array($result);
         } else {
-            $insertHour = "INSERT INTO `hours` (`classesId`, `weeksId`, `hour`, `day`) VALUES (?,?,?,?)";
-            $stm = $this->getPreStm($insertHour);
-            $stm->bind_param("iiii", $classesId, $classesId, $hour, $day);
-            $stm->execute();
-            $id = $stm->insert_id;
-            $stm->close();
-            
-            $this->selectHour($id, null, null, null, null);
-            return mysqli_fetch_array($this->result);
-        }
-    }
-
-    function selectHour ($id, $classesId, $weeksId, $hour, $day) {
-        $selectHour = "SELECT * FROM `hours` WHERE " . "`id` = COALESCE(" .
-                 $this->msqli_set_null($id) . ", `id`) AND" .
-                 "`classesId` LIKE COALESCE(" . $this->msqli_set_null(
-                        $classesId) . ", `classesId`) AND " .
-                 "`weeksId` LIKE COALESCE(" . $this->msqli_set_null($weeksId) .
-                 ", `weeksId`) AND " . "`hour` LIKE COALESCE(" .
-                 $this->msqli_set_null($hour) . ", `hour`) AND " .
-                 "`day` LIKE COALESCE(" . $this->msqli_set_null($day) .
-                 ", `day`) ";
-        return $this->getResult($selectHour);
-    }
-
-    function insertFieldInfo ($data, $dataTyp, $weeksId, $hour) {
-        $result = $this->selectFieldInfo(null, $data, $dataTyp, 
-                $weeksId, $hour);
-        
-        if ($this->getRowNums() >= 1) {
-            return mysqli_fetch_array($result);
-        } else {
-            $insertFieldInfo = "INSERT INTO `fieldInfos` (`data`,`weeksId` , `hour` ,`dataTyp`) VALUES (?,?,?,?)";
+            $insertFieldInfo = "INSERT INTO `fieldInfos` (`data`,`weeksId` , `hour` ,`dataTyp`, `classesId`) VALUES (?,?,?,?,?)";
             $stm = $this->getPreStm($insertFieldInfo);
-            $stm->bind_param("siii", $data, $weeksId, $hour, $dataTyp);
+            $stm->bind_param("siiii", $data, $weeksId, $hour, $dataTyp, $classesId);
             $stm->execute();
             $id = $stm->insert_id;
             $stm->close();
             
-            $this->selectFieldInfo($id, null, null, null, null);
+            $this->selectFieldInfo($id, null, null, null, null, null);
             return mysqli_fetch_array($this->result);
         }
     }
 
-    function selectFieldInfo ($id, $data, $dataTyp, $weeksId, $hour) {
+    function selectFieldInfo ($id, $data, $dataTyp, $weeksId, $classesId, $hour) {
         $selectHour = "SELECT * FROM `fieldInfos` WHERE " . "`id` = COALESCE(" .
-                 $this->msqli_set_null($id) . ", `id`) AND" . "`data` LIKE COALESCE(" .
-                 $this->msqli_set_null($data) . ", `data`) AND " .
-                 "`weeksId` LIKE COALESCE(" . $this->msqli_set_null($weeksId) .
+                 $this->msqli_set_null($id) . ", `id`) AND" .
+                 "`data` LIKE COALESCE(" . $this->msqli_set_null($classesId) .
+                 ", `data`) AND " . "`classesId` LIKE COALESCE(" .
+                 $this->msqli_set_null($data) . ", `classesId`) AND " .                 
+                "`weeksId` LIKE COALESCE(" . $this->msqli_set_null($weeksId) .
                  ", `weeksId`) AND " . "`hour` LIKE COALESCE(" .
                  $this->msqli_set_null($hour) . ", `hour`) AND " .
                  "`dataTyp` LIKE COALESCE(" . $this->msqli_set_null($dataTyp) .
