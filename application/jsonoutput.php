@@ -1,41 +1,90 @@
 <?php
 include ('db.php');
+header('Content-Type: application/json');
 
 $db = new db();
 $db->connectDB();
 
-// echo var_dump($_GET);
-
-// Todo Has Key check!
-if ($_GET["class"] !== null && $_GET["class"] == "all") {
-    $result = $db->selectClass(null, null, null, null);
-    while ($row = mysqli_fetch_array($result)) {
-        echo json_encode($row);
+$jsonOutput = "{\"data\":\"no return\"}";
+if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
+    if ($_GET["field"] == "all" && $_GET["class"] == "all") {
+        $result = $db->selectFieldInfo(null, null, null, null, null, null);
+        $jsonOutput = "";
+        while ($row = mysqli_fetch_array($result)) {
+            $jsonOutput = $jsonOutput . json_encode($row);
+        }
+    } else {
+        $result = $db->selectFieldInfo(null, null, null, $_GET["field"], 
+                $_GET["class"], null);
+        $jsonOutput = "";
+        
+        while ($row = mysqli_fetch_array($result)) {
+            $jsonOutput = $jsonOutput . json_encode($row);
+        }
     }
-}else if ($_GET["class"] !== null) {
-    $result = $db->selectClass(null, null, null, $_GET["class"]);
-    while ($row = mysqli_fetch_array($result)) {
-        echo json_encode($row);
-    }
-}else if($_GET["week"] == "all"){
-    $result = $db->selectWeek(null, null, null);
-    while ($row = mysqli_fetch_array($result)) {
-        echo json_encode($row);
-    }
-}else if($_GET["week"] !== null){
-    $result = $db->selectWeek(null, $_GET["week"], null);
-    while ($row = mysqli_fetch_array($result)) {
-        echo json_encode($row);
-    }
-}else if($_GET["field"] == "all"){
-    $result = $db->selectFieldInfo(null, null, null, null, null);
-    while ($row = mysqli_fetch_array($result)) {
-        echo json_encode($row);
-    }
-}else if($_GET["field"] !== null){
-    $result = $db->selectFieldInfo(null, null, $_GET["field"], null, null);
-    while ($row = mysqli_fetch_array($result)) {
-        echo json_encode($row);
-    }
-}
+} else 
+    if (array_key_exists("class", $_GET)) {
+        if ($_GET["class"] == "all") {
+            $result = $db->selectClass(null, null, null, null);
+            $jsonOutput = "{\"classes\":[";
+            while ($row = mysqli_fetch_array($result)) {
+                $jsonOutput = $jsonOutput . json_encode($row);
+                $jsonOutput = $jsonOutput . ",";
+            }
+            $jsonOutput = rtrim($jsonOutput, ",");
+            $jsonOutput = $jsonOutput . "]}";
+        } else {
+            $result = $db->selectClass(null, null, null, $_GET["class"]);
+            $jsonOutput = "{\"classes\":[";
+            while ($row = mysqli_fetch_array($result)) {
+                $jsonOutput = $jsonOutput . json_encode($row);
+                $jsonOutput = $jsonOutput . ",";
+            }
+            $jsonOutput = rtrim($jsonOutput, ",");
+            $jsonOutput = $jsonOutput . "]}";
+        }
+    } else 
+        if (array_key_exists("week", $_GET)) {
+            
+            if ($_GET["week"] == "all") {
+                $result = $db->selectWeek(null, null, null);
+                $jsonOutput = "{\"weeks\":[";
+                
+                while ($row = mysqli_fetch_array($result)) {
+                    $jsonOutput = $jsonOutput . json_encode($row);
+                    $jsonOutput = $jsonOutput . ",";
+                }
+                $jsonOutput = rtrim($jsonOutput, ",");
+                $jsonOutput = $jsonOutput . "]}";
+            } else 
+                if ($_GET["week"] !== null) {
+                    $result = $db->selectWeek(null, $_GET["week"], null);
+                    $jsonOutput = "";
+                    $jsonOutput = "{\"weeks\":[";
+                    while ($row = mysqli_fetch_array($result)) {
+                        $jsonOutput = $jsonOutput . json_encode($row);
+                        $jsonOutput = $jsonOutput . ",";
+                    }
+                    $jsonOutput = rtrim($jsonOutput, ",");
+                    $jsonOutput = $jsonOutput . "]}";
+                }
+        } else 
+            if (array_key_exists("field", $_GET)) {
+                if ($_GET["field"] == "all") {
+                    $result = $db->selectFieldInfo(null, null, null, null, null, 
+                            null);
+                    $jsonOutput = "";
+                    while ($row = mysqli_fetch_array($result)) {
+                        $jsonOutput = $jsonOutput . json_encode($row);
+                    }
+                } else {
+                    $result = $db->selectFieldInfo(null, null, null, 
+                            $_GET["field"], null, null);
+                    $jsonOutput = "";
+                    while ($row = mysqli_fetch_array($result)) {
+                        $jsonOutput = $jsonOutput . json_encode($row);
+                    }
+                }
+            }
+echo $jsonOutput;
 ?>
