@@ -14,6 +14,7 @@ class db {
 
     function connectDB () {
         $this->conn = new mysqli("localhost", "root", "", "bkkUnits");
+      //  $this->conn = new mysqli("db-s1.rb-host.de", "bkk-kleve", "EvPafcohaHabewn+", "bkk-kleve");
     }
 
     function getResult ($query) {
@@ -94,7 +95,7 @@ class db {
                  "`weeksId` = COALESCE(" . $this->msqli_set_null($weeksId) .
                  ", `weeksId`) AND" . "`number` = COALESCE(" .
                  $this->msqli_set_null($number) . ", `number`) AND" .
-                 "`name` = COALESCE(" . $this->msqli_set_null($name) .
+                 "`name` like COALESCE(" . $this->msqli_set_null($name) .
                  ", `name`)";
         return $this->getResult($selectClass);
     }

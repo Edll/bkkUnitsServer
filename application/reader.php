@@ -5,9 +5,9 @@ include ('weeks_import.php');
 include ('plan_import.php');
 
 function getData () {
-    // $naviPath =
-    // "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
-    $naviPath = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+     $naviPath =
+     "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+    //$naviPath = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
     
     $db = new db();
     $db->connectDB();
@@ -37,11 +37,11 @@ function getData () {
             echo "--- Eintragen der Klasse: " . $classResult['id'] . " " .
                      $classResult['name'] . "</br>";
             
-            // $path_plan =
-            // "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/" .
-            // $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
-            $path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
-                     $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
+            $path_plan =
+             "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/" .
+             $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
+         //   $path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
+           //          $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
             
             echo "Pfad: " . $path_plan . "</br>";
             
