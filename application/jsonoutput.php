@@ -8,19 +8,26 @@ $db->connectDB();
 $jsonOutput = "{\"data\":\"no return\"}";
 if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
     if ($_GET["field"] == "all" && $_GET["class"] == "all") {
-        $result = $db->selectFieldInfo(null, null, null, null, null, null);
-        $jsonOutput = "";
+        
+        $result = $db->selectFieldInfo(null, null, null, null, null, null, null);
+        $jsonOutput = "{\"fields\":[";
         while ($row = mysqli_fetch_array($result)) {
             $jsonOutput = $jsonOutput . json_encode($row);
+            $jsonOutput = $jsonOutput . ",";
         }
+        $jsonOutput = rtrim($jsonOutput, ",");
+        $jsonOutput = $jsonOutput . "]}";
     } else {
         $result = $db->selectFieldInfo(null, null, null, $_GET["field"], 
-                $_GET["class"], null);
-        $jsonOutput = "";
+                $_GET["class"], null, null);
+        $jsonOutput = "{\"fields\":[";
         
         while ($row = mysqli_fetch_array($result)) {
             $jsonOutput = $jsonOutput . json_encode($row);
+            $jsonOutput = $jsonOutput . ",";
         }
+        $jsonOutput = rtrim($jsonOutput, ",");
+        $jsonOutput = $jsonOutput . "]}";
     }
 } else 
     if (array_key_exists("class", $_GET)) {
@@ -72,18 +79,25 @@ if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
             if (array_key_exists("field", $_GET)) {
                 if ($_GET["field"] == "all") {
                     $result = $db->selectFieldInfo(null, null, null, null, null, 
-                            null);
-                    $jsonOutput = "";
+                            null, null);
+                    $jsonOutput = "{\"fields\":[";
                     while ($row = mysqli_fetch_array($result)) {
                         $jsonOutput = $jsonOutput . json_encode($row);
+                        $jsonOutput = $jsonOutput . ",";
                     }
+                    $jsonOutput = rtrim($jsonOutput, ",");
+                    $jsonOutput = $jsonOutput . "]}";
                 } else {
+                    
                     $result = $db->selectFieldInfo(null, null, null, 
-                            $_GET["field"], null, null);
-                    $jsonOutput = "";
+                            $_GET["field"], null, null, null);
+                    $jsonOutput = "{\"fields\":[";
                     while ($row = mysqli_fetch_array($result)) {
                         $jsonOutput = $jsonOutput . json_encode($row);
+                        $jsonOutput = $jsonOutput . ",";
                     }
+                    $jsonOutput = rtrim($jsonOutput, ",");
+                    $jsonOutput = $jsonOutput . "]}";
                 }
             }
 echo $jsonOutput;

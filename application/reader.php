@@ -5,9 +5,10 @@ include ('weeks_import.php');
 include ('plan_import.php');
 
 function getData () {
-     $naviPath =
-     "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
-    //$naviPath = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+    $naviPath = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+    // $naviPath =
+    // "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
+    echo "Lese NaviBar " . $naviPath;
     
     $db = new db();
     $db->connectDB();
@@ -17,6 +18,7 @@ function getData () {
     $plan = new read_plan();
     
     foreach ($weeks->read($naviPath) as $WeekValue) {
+        echo "Weeks<br>";
         $weekResult = $db->insertWeeks($WeekValue[0], $WeekValue[1]);
         echo "--- Eintragen der Woche: " . $weekResult['number'] . "</br>";
         
@@ -37,11 +39,11 @@ function getData () {
             echo "--- Eintragen der Klasse: " . $classResult['id'] . " " .
                      $classResult['name'] . "</br>";
             
-            $path_plan =
-             "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/" .
-             $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
-         //   $path_plan = "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
-           //          $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
+            $path_plan = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/" .
+                     $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
+            // $path_plan =
+            // "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
+            // $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
             
             echo "Pfad: " . $path_plan . "</br>";
             
@@ -65,7 +67,8 @@ function getData () {
                                 $db->insertFieldInfo(
                                         preg_replace('/\s+/', ' ', $fildValue), 
                                         $fieldTypCounter, $weekResult['id'], 
-                                        $stunde, $classResult['id']);
+                                        $stunde, $classResult['id'], 
+                                        $tagColumeCounter);
                             }
                         }
                         $fieldTypCounter ++;
@@ -78,7 +81,13 @@ function getData () {
     }
     $db->closeDB();
 }
+try {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    getData();
+} catch (Exception $e) {
+    echo 'Exception abgefangen: ', $e->getMessage(), "\n";
+}
 
-getData();
 ?>
 	
