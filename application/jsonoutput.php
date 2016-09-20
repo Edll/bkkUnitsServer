@@ -31,7 +31,16 @@ if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
     }
 } else 
     if (array_key_exists("class", $_GET)) {
-        if ($_GET["class"] == "all") {
+        if ($_GET["class"] == "this") {
+            $result = $db->selectClass(null, $_GET["week"], null, null);
+            $jsonOutput = "{\"classes\":[";
+            while ($row = mysqli_fetch_array($result)) {
+                $jsonOutput = $jsonOutput . json_encode($row);
+                $jsonOutput = $jsonOutput . ",";
+            }
+            $jsonOutput = rtrim($jsonOutput, ",");
+            $jsonOutput = $jsonOutput . "]}";
+        }else if ($_GET["class"] == "all") {
             $result = $db->selectClass(null, null, null, null);
             $jsonOutput = "{\"classes\":[";
             while ($row = mysqli_fetch_array($result)) {
