@@ -31,7 +31,7 @@ class read_plan {
         unset($nodeValue[0]);
         
         // remove montag - freitag
-        for ($i = 0; $i < 8; $i ++) {
+        for ($i = 0; $i < 7; $i ++) {
             unset($nodeValue[$i]);
         }
         $dataCounter = 0;
@@ -68,7 +68,7 @@ class read_plan {
             
             // Durchzählen der Tabel struktur
             $dataCounter ++;
-            if ($dataCounter % 7 == 0) {
+            if ($dataCounter % 6 == 0) {
                 $stundeCounter ++;
                 $tagCounter = 0;
             } else {

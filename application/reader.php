@@ -77,6 +77,7 @@ function getData () {
                 }
                 $tagColumeCounter = 0;
             }
+            break;
         }
     }
     $db->closeDB();
