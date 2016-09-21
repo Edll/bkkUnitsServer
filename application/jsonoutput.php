@@ -10,7 +10,7 @@ if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
     if ($_GET["field"] == "all" && $_GET["class"] == "all") {
         
         $result = $db->selectFieldInfo(null, null, null, null, null, null, null);
-        $jsonOutput = "{\"fields\":[";
+        $jsonOutput = "{\"timetable\":[";
         while ($row = mysqli_fetch_array($result)) {
             $jsonOutput = $jsonOutput . json_encode($row);
             $jsonOutput = $jsonOutput . ",";
@@ -20,7 +20,7 @@ if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
     } else {
         $result = $db->selectFieldInfo(null, null, null, $_GET["field"], 
                 $_GET["class"], null, null);
-        $jsonOutput = "{\"fields\":[";
+        $jsonOutput = "{\"timetable\":[";
         
         while ($row = mysqli_fetch_array($result)) {
             $jsonOutput = $jsonOutput . json_encode($row);
@@ -89,7 +89,7 @@ if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
                 if ($_GET["field"] == "all") {
                     $result = $db->selectFieldInfo(null, null, null, null, null, 
                             null, null);
-                    $jsonOutput = "{\"fields\":[";
+                    $jsonOutput = "{\"timetable\":[";
                     while ($row = mysqli_fetch_array($result)) {
                         $jsonOutput = $jsonOutput . json_encode($row);
                         $jsonOutput = $jsonOutput . ",";
@@ -100,7 +100,7 @@ if (array_key_exists("field", $_GET) && array_key_exists("class", $_GET)) {
                     
                     $result = $db->selectFieldInfo(null, null, null, 
                             $_GET["field"], null, null, null);
-                    $jsonOutput = "{\"fields\":[";
+                    $jsonOutput = "{\"timetable\":[";
                     while ($row = mysqli_fetch_array($result)) {
                         $jsonOutput = $jsonOutput . json_encode($row);
                         $jsonOutput = $jsonOutput . ",";
