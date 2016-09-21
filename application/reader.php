@@ -4,11 +4,15 @@ include ('classes_import.php');
 include ('weeks_import.php');
 include ('plan_import.php');
 
-function getData () {
+
+function getData () {    
+
+			
     $naviPath = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
     // $naviPath =
     // "http://localhost/untis/fileadmin/technik/infoplaene/schueler/frames/navbar.htm";
-    echo "Lese NaviBar " . $naviPath;
+    
+    $msg = "Lese NaviBar " . $naviPath . "\n";
     
     $db = new db();
     $db->connectDB();
@@ -18,9 +22,9 @@ function getData () {
     $plan = new read_plan();
     
     foreach ($weeks->read($naviPath) as $WeekValue) {
-        echo "Weeks<br>";
+       $msg = $msg . "Weeks\n";
         $weekResult = $db->insertWeeks($WeekValue[0], $WeekValue[1]);
-        echo "--- Eintragen der Woche: " . $weekResult['number'] . "</br>";
+        $msg = $msg . "--- Eintragen der Woche: " . $weekResult['number'] . "\n";
         
         $classCounter = 0;
         
@@ -36,8 +40,8 @@ function getData () {
             
             $classResult = $db->insertClass($weekResult['id'], $classNumber, 
                     $classData);
-            echo "--- Eintragen der Klasse: " . $classResult['id'] . " " .
-                     $classResult['name'] . "</br>";
+            $msg = $msg ."--- Eintragen der Klasse: " . $classResult['id'] . " " .
+                     $classResult['name'] . "\n";
             
             $path_plan = "http://www.bkkleve.de/fileadmin/technik/infoplaene/schueler/" .
                      $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
@@ -45,7 +49,7 @@ function getData () {
             // "http://localhost/untis/fileadmin/technik/infoplaene/schueler/" .
             // $weekResult['number'] . "/c/c000" . $classNumber . ".htm";
             
-            echo "Pfad: " . $path_plan . "</br>";
+            $msg = $msg . "Pfad: " . $path_plan . "\n";
             
             $planData = $plan->read($path_plan);
             
@@ -80,14 +84,27 @@ function getData () {
         }
     }
     $db->closeDB();
+    return $msg;
 }
+
 try {
+	$datum = date("d.m.Y");
+	$uhrzeit = date("H:i");
+	$msg = "Start!". $datum." - ".$uhrzeit." Uhr \n";
+	
+	
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
-    getData();
+   $msg = $msg . getData();
 } catch (Exception $e) {
-    echo 'Exception abgefangen: ', $e->getMessage(), "\n";
+    $msg = $msg . 'Exception abgefangen: '. $e->getMessage() . "\n";
 }
+
+$datum = date("d.m.Y");
+$uhrzeit = date("H:i");
+$msg = $msg . "Ende!". $datum." - ".$uhrzeit." Uhr \n";
+
+mail('junk@edlly.de', 'Reader durchgelaufen', $msg);
 
 ?>
 	

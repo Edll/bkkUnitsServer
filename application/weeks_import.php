@@ -22,7 +22,6 @@ class read_weeks {
         $week_string = str_replace("value=", "", $week_string);
         $week_string = str_replace("\"", " ", $week_string);
         
-        echo "Lese Datenfeld: " . $week_string . "<br>";
         // TODO Weeks Value must be convert to int and than reduce -1 but check
         // it in the raw datas
         $rawData = explode(" ", $week_string);
@@ -37,7 +36,6 @@ class read_weeks {
         $result;
         $weeks;
         foreach ($rawData as $dataFields) {
-            echo "Lese Datenfeld: " . $dataFields . "<br>";
             if ($dataCounter % 2 != 1) {
                 $weeks[0] = $dataFields;
             } else {
