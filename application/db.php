@@ -47,9 +47,7 @@ class db {
         
         if ($this->getRowNums() >= 1) {
             return mysqli_fetch_array($result);
-            echo "Result großer 1: " . "<br>";
         } else {
-            echo "insert" . "<br>";
             $insertWeeks = "INSERT INTO `weeks` ( `number`, `date`) VALUES (?, ?)";
             
             $stm = $this->getPreStm($insertWeeks);
@@ -58,7 +56,6 @@ class db {
             $id = $stm->insert_id;
             $stm->close();
             
-            echo "select week " . $id . "<br>";
             $this->selectWeek($id, null, null);
             return mysqli_fetch_array($this->result);
         }

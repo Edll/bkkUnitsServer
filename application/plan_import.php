@@ -26,7 +26,6 @@ class read_plan {
             // $nodeValue [] = $table->nodeValue;
             $nodeValue[] = $table;
         }
-        // echo $counter;
         // remove erstes element das ist die ober Table
         unset($nodeValue[0]);
         
