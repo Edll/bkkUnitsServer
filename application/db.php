@@ -13,9 +13,9 @@ class db {
     private $stm;
 
     function connectDB () {
-        $this->conn = new mysqli("localhost", "root", "", "bkk-kleve");
-        // $this->conn = new mysqli("db-s1.rb-host.de", "bkk-kleve",
-    // "EvPafcohaHabewn+", "bkk-kleve");
+       // $this->conn = new mysqli("localhost", "root", "", "bkk-kleve");
+         $this->conn = new mysqli("db-s1.rb-host.de", "bkk-kleve",
+     "EvPafcohaHabewn+", "bkk-kleve");
     }
 
     function getResult ($query) {
@@ -105,8 +105,7 @@ class db {
     }
 
     function insertFieldInfo ($data, $dataTyp, $weeksId, $hour, $classesId, $day) {
-        $result = $this->selectFieldInfo(null, $data, $dataTyp, $weeksId, $hour, 
-                $classesId, $day);
+        $result = $this->selectFieldInfo(null, $data, $dataTyp, $weeksId, $classesId, $hour, $day);
         
         if ($this->getRowNums() >= 1) {
             return mysqli_fetch_array($result);
