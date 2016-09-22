@@ -13,9 +13,9 @@ class db {
     private $stm;
 
     function connectDB () {
-       // $this->conn = new mysqli("localhost", "root", "", "bkk-kleve");
-         $this->conn = new mysqli("db-s1.rb-host.de", "bkk-kleve",
-     "EvPafcohaHabewn+", "bkk-kleve");
+        $this->conn = new mysqli("localhost", "root", "", "bkk-kleve");
+     //    $this->conn = new mysqli("db-s1.rb-host.de", "bkk-kleve",
+  //   "EvPafcohaHabewn+", "bkk-kleve");
     }
 
     function getResult ($query) {
@@ -40,6 +40,10 @@ class db {
     function getPreStm ($query) {
         $this->doPreStm($query);
         return $this->stm;
+    }
+    
+    function mysqli_real_escape_string(string $data){
+    	return $this->conn->real_escape_string($data);
     }
 
     function insertWeeks ($number, $date) {
