@@ -19,7 +19,10 @@ class reader {
     public $msg;
 
     function read (bool $showOutput, bool $sendMail) {
-        set_error_handler(array( $this,'warning_handler' ), E_ALL);
+        set_error_handler(array(
+                $this,
+                'warning_handler'
+        ), E_ALL);
         
         $this->add_line_to_msg("Start: " . $this->get_time());
         
@@ -31,18 +34,18 @@ class reader {
         
         $this->add_line_to_msg("Ende: " . $this->get_time());
         
-        if($showOutput){
-        echo nl2br($this->msg);
+        if ($showOutput) {
+            echo nl2br($this->msg);
         }
         
-        if($sendMail){
-        mail('junk@edlly.de', 'Reader durchgelaufen', $this->msg);
+        if ($sendMail) {
+            mail('junk@edlly.de', 'Reader durchgelaufen', $this->msg);
         }
     }
 
     function getData () {
         $this->add_line_to_msg("Lese NaviBar; " . PATH_NAVI);
-            
+        
         $db = new db();
         $db->connectDB();
         
@@ -50,9 +53,10 @@ class reader {
         $classes = new read_classes();
         $plan = new read_plan();
         
-        foreach ($weeks->read(PATH_NAVI) as $WeekValue) { 
+        foreach ($weeks->read(PATH_NAVI) as $WeekValue) {
             $weekResult = $db->insertWeeks($WeekValue[0], $WeekValue[1]);
-            $this->add_line_to_msg("Eintragen der Woche: " . $weekResult['number']);
+            $this->add_line_to_msg(
+                    "Eintragen der Woche: " . $weekResult['number']);
             $this->add_line_to_msg("");
             
             $classCounter = 0;
@@ -70,14 +74,15 @@ class reader {
                 $classResult = $db->insertClass($weekResult['id'], $classNumber, 
                         $classData);
                 
-                $this->add_line_to_msg("Eintragen der Klasse: " . $classResult['id'] . " " . $classResult['name']);
-             
+                $this->add_line_to_msg(
+                        "Eintragen der Klasse: " . $classResult['id'] . " " .
+                                 $classResult['name']);
                 
                 $path_plan = PATH_PLAN . $weekResult['number'] . "/c/c000" .
                          $classNumber . ".htm";
                 
-                 $this->add_line_to_msg("Pfad: " . $path_plan );
-                 $this->add_line_to_msg("");
+                $this->add_line_to_msg("Pfad: " . $path_plan);
+                $this->add_line_to_msg("");
                 
                 $planData = $plan->read($path_plan);
                 

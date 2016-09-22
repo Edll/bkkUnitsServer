@@ -85,7 +85,7 @@ class read_plan {
             // dem DOM model.
             unset($stundenArray[$size - 1]);
         } else {
-            // Kein standart plan
+                // Kein standart plan
             $tagArray;
             
             $fieldInfoArray;
