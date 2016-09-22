@@ -1,5 +1,6 @@
 <?php
 include ('db_param.php');
+
 class db {
 
     private $conn;
