@@ -12,13 +12,13 @@ define("PATH_PLAN",
 ini_set('display_errors', 1);
 
 $read = new reader();
-$read->read(TRUE, TRUE);
+$read->read(FALSE, TRUE);
 
 class reader {
 
     public $msg;
 
-    function read (bool $showOutput, bool $sendMail) {
+    function read ($showOutput, $sendMail) {
         set_error_handler(array(
                 $this,
                 'warning_handler'
