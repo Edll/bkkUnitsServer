@@ -111,7 +111,7 @@ class read_plan {
             $tagArray[0] = $fieldInfoArray;
             $tagArray[1] = $fieldInfoArray;
             $stundenArray[1] = $tagArray;
-        }
+         }
         return $stundenArray;
     }
 }
