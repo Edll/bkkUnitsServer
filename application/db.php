@@ -45,7 +45,7 @@ class db {
     function mysqli_real_escape_string(string $data){
     	return $this->conn->real_escape_string($data);
     }
-
+ 
     function insertWeeks ($number, $date) {
         $result = $this->selectWeek(null, $number, $date);
         
