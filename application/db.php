@@ -1,5 +1,5 @@
 <?php
-
+include ('db_param.php');
 class db {
 
     private $conn;
@@ -13,9 +13,7 @@ class db {
     private $stm;
 
     function connectDB () {
-        $this->conn = new mysqli("localhost", "root", "", "bkk-kleve");
-     //    $this->conn = new mysqli("db-s1.rb-host.de", "bkk-kleve",
-  //   "EvPafcohaHabewn+", "bkk-kleve");
+        $this->conn = new mysqli(SERVER, USER, PASS, DB);
     }
 
     function getResult ($query) {
@@ -41,11 +39,11 @@ class db {
         $this->doPreStm($query);
         return $this->stm;
     }
-    
-    function mysqli_real_escape_string(string $data){
-    	return $this->conn->real_escape_string($data);
+
+    function mysqli_real_escape_string (string $data) {
+        return $this->conn->real_escape_string($data);
     }
- 
+
     function insertWeeks ($number, $date) {
         $result = $this->selectWeek(null, $number, $date);
         
@@ -106,7 +104,8 @@ class db {
     }
 
     function insertFieldInfo ($data, $dataTyp, $weeksId, $hour, $classesId, $day) {
-        $result = $this->selectFieldInfo(null, $data, $dataTyp, $weeksId, $classesId, $hour, $day);
+        $result = $this->selectFieldInfo(null, $data, $dataTyp, $weeksId, 
+                $classesId, $hour, $day);
         
         if ($this->getRowNums() >= 1) {
             return mysqli_fetch_array($result);
