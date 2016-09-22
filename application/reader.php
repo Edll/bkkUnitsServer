@@ -122,7 +122,7 @@ class reader {
 
     private function get_time () {
         $datum = date("d.m.Y");
-        $uhrzeit = date("H:i");
+        $uhrzeit = date("H:i:s");
         return $datum . " - " . $uhrzeit . " Uhr";
     }
 
