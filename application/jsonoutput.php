@@ -1,6 +1,7 @@
 <?php
 include ('db.php');
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 define("GET_FUNC", "func");
 define("GET_FUNC_WEEK", "week");
 define("GET_FUNC_CLASS", "class");
@@ -40,6 +41,7 @@ function call_funktion (db $db) {
                     break;
                 case GET_FUNC_TIMETABLE:
                     $jsonOutput = show_timetable_selection($db);
+                    
                     break;
                 default:
                     $jsonOutput = show_error_no_selection();
@@ -135,7 +137,7 @@ function show_timetable_selection (db $db) {
     return $json;
 }
 
-function filter_get (db $db, string $get_name) {
+function filter_get (db $db, $get_name) {
     $data = filter_input(INPUT_GET, $get_name, FILTER_SANITIZE_ENCODED);
     $data = $db->mysqli_real_escape_string($data);
     return $data;
