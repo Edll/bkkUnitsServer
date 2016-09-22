@@ -45,6 +45,7 @@ function getData () {
                      $classNumber . ".htm";
             
             $msg = $msg . "Pfad: " . $path_plan . "\n";
+            echo "Pfad: " . $path_plan . "</br>";
             
             $planData = $plan->read($path_plan);
             
